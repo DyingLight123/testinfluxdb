@@ -1,41 +1,75 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/influxdata/platform/kit/errors"
 	"github.com/robfig/cron"
 	"log"
 	"testinfluxdb/models"
-	"time"
 )
 
 type RedisController struct {
 	beego.Controller
 }
 
-type InPutInt struct {
+/*type InPutInt struct {
 	Number  int    `json:"number"`
 	Refresh string `json:"refresh"`
-}
+}*/
 
-func (data *RedisController) Post() {
-	var request InPutInt
-	json.Unmarshal(data.Ctx.Input.RequestBody, &request)
-	c := cron.New()
-	c.AddFunc("@every " + request.Refresh, func() {
-		err := models.AddRedisData(request.Number)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("redis已更新！")
-	})
-	c.Start()
-	time.AfterFunc(time.Minute, c.Stop)
+var pause = make(chan string, 1)
+var status int
+
+func (data *RedisController) Get() {
+	go RefreshRedis(100000)
+
+	data.Data["json"] = map[string]interface{}{}
 	data.ServeJSON()
 }
 
-func (data *RedisController) Get() {
+func (data *RedisController) Post() {
+	err := PauseRedis()
+	if err != nil {
+		data.Data["json"] = map[string]interface{}{"message": "可以开始刷新了！"}
+	} else {
+		data.Data["json"] = map[string]interface{}{"message": "刷新停止！"}
+	}
+	data.ServeJSON()
+}
+
+func RefreshRedis(number int) {
+	if status == 1 {
+		log.Println("refreshing! please pause! ")
+		return
+	}
+	status = 1
+	c := cron.New()
+	c.AddFunc("@every "+"30s", func() {
+		err := models.AddRedisData(number)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		log.Println("redis已更新！")
+	})
+	c.Start()
+	<-pause
+	status = 0
+	log.Println("continue")
+	c.Stop()
+	//time.AfterFunc(30 * time.Second, c.Stop)
+}
+
+func PauseRedis() error {
+	if status != 1 {
+		return errors.New("please begin refresh!")
+	}
+	log.Println("pause")
+	pause <- "continue"
+	return nil
+}
+
+/*func (data *RedisController) Get() {
 	field, err := models.GetRedisData()
 	list := make(map[string]interface{}, 0)
 	if err != nil {
@@ -53,3 +87,4 @@ func (data *RedisController) Get() {
 	//fmt.Println(field)
 	data.ServeJSON()
 }
+*/

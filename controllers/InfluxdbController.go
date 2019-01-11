@@ -15,8 +15,9 @@ type InfluxdbController struct {
 }
 
 type InputTime struct {
-	T1 string `json:"t1"`
-	T2 string `json:"t2"`
+	T1   string            `json:"t1"`
+	T2   string            `json:"t2"`
+	Tags map[string]string `json:"tags"`
 }
 
 func (maps *InfluxdbController) Get() {
@@ -37,7 +38,7 @@ func (maps *InfluxdbController) Get() {
 func (maps *InfluxdbController) Post() {
 	t := new(InputTime)
 	json.Unmarshal(maps.Ctx.Input.RequestBody, t)
-	result, err := models.GetInfluxdbData(t.T1, t.T2)
+	result, err := models.GetInfluxdbData(t.T1, t.T2, t.Tags)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,4 +52,3 @@ func (maps *InfluxdbController) Post() {
 	maps.Data["json"] = map[string]interface{}{"data": list, "length": len(list)}
 	maps.ServeJSON()
 }
-

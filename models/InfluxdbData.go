@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -9,8 +8,7 @@ import (
 
 type MapResults struct {
 	MapTime string
-	Key     string
-	Value   map[string]interface{}
+	Value   interface{}
 }
 
 func AddInfluxdbData() error {
@@ -26,10 +24,29 @@ func AddInfluxdbData() error {
 	return nil
 }
 
-func GetInfluxdbData(t1 string, t2 string) ([]*MapResults, error) {
+func GetInfluxdbData(t1 string, t2 string, tags map[string]string) ([]*MapResults, error) {
 	conn := ConnInfluxdb()
-	cmd := fmt.Sprintf("select * from %s where time >= %s and time < %s tz('Asia/Shanghai')",
-		"map", "'" + t1+ "'", "'" + t2 + "'")
+	fmt.Println(tags)
+	cmd1 := " "
+	for key, value := range tags {
+		switch key {
+		case "key":
+			if value == "" {
+				break
+			}
+			cmd1 = cmd1 + " and " + "\"" + "key" + "\"" + " = " + "'" + value + "'" + " "
+		case "value1":
+			if value == "" {
+				break
+			}
+			cmd1 = cmd1 + " and " + "\"" + "value1" + "\"" + " = " + "'" + value + "'" + " "
+		default:
+
+		}
+	}
+	cmd := fmt.Sprintf("select * from %s where time >= %s and time < %s"+cmd1+"tz('Asia/Shanghai')",
+		"map", "'"+t1+"'", "'"+t2+"'")
+	fmt.Println(cmd)
 	res, err := QueryDB(conn, cmd)
 	if err != nil {
 		return nil, err
@@ -46,29 +63,30 @@ func GetInfluxdbData(t1 string, t2 string) ([]*MapResults, error) {
 		}
 		m := new(MapResults)
 		m.MapTime = row[0].(string)
-		m.Key = row[1].(string)
+		m.Value = row[2]
+		//m.Key = row[1].(string)
 
-		x := row[2].(string)
+		/*x := row[2].(string)
 		n := make(map[string]interface{})
 		json.Unmarshal([]byte(x), &n)
-		m.Value = n
+		m.Value = n*/
 		/*
-		switch row[2].(type) {
-		case json.Number:
-			str := string(row[2].(json.Number))
-			m.Value, err = strconv.Atoi(str)
-			if err != nil {
-				log.Fatal(err)
-			}
-			//fmt.Println("执行了我")
-		case string:
-			m.Value, err = strconv.Atoi(row[2].(string))
-			if err != nil {
-				log.Fatal(err)
-			}
-		case :
+			switch row[2].(type) {
+			case json.Number:
+				str := string(row[2].(json.Number))
+				m.Value, err = strconv.Atoi(str)
+				if err != nil {
+					log.Fatal(err)
+				}
+				//fmt.Println("执行了我")
+			case string:
+				m.Value, err = strconv.Atoi(row[2].(string))
+				if err != nil {
+					log.Fatal(err)
+				}
+			case :
 
-		}*/
+			}*/
 		results = append(results, m)
 	}
 	return results, nil

@@ -19,14 +19,14 @@ type BeginRefreshRedis struct {
 }*/
 
 func (this *BeginRefreshRedis) Get() {
-	this.Redisinfluxdb = &RedisInfluxdb.RedisInfluxdb{"127.0.0.1:6379", "", "data",
+	this.Redisinfluxdb = &RedisInfluxdb.RedisInfluxdb{"localhost:6379", "", "data",
 		"http://127.0.0.1:8086", "admin", "admin", "test",
 		"redis"}
 	fmt.Println(this.Redisinfluxdb)
 
-	go this.Redisinfluxdb.RefreshRedis(100)
+	go this.Redisinfluxdb.RefreshRedis(100000)
 
-	this.Data["json"] = map[string]interface{}{"message": "刷新成功！"}
+	this.Data["json"] = map[string]interface{}{}
 	this.ServeJSON()
 }
 

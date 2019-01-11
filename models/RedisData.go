@@ -8,19 +8,20 @@ import (
 )
 
 func AddRedisData(number int) error {
-	redis := ConnRedis()
-	defer redis.Close()
-	_, err := redis.Del("data").Result()
+	cli := ConnRedis()
+	defer cli.Close()
+
+	_, err := cli.Del("data").Result()
 	if err != nil {
 		return err
 	}
 	rand.Seed(time.Now().Unix())
 	for i := 0; i < number; i++ {
-		x := rand.Intn(10000)
+		x := rand.Float64() * 1000000
 		m := make(map[string]interface{})
-		m["value"] = x
+		m["value"+strconv.Itoa(i)] = x
 		j, _ := json.Marshal(m)
-		redis.HSet("data", "value" + strconv.Itoa(i), string(j))
+		cli.HSet("data", strconv.Itoa(i), string(j))
 	}
 	return nil
 }

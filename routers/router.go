@@ -6,13 +6,11 @@ import (
 )
 
 func init() {
-    beego.Router("/", &controllers.MainController{})
+	beego.Router("/", &controllers.MainController{})
 
-    beego.Router("/influxdb", &controllers.InfluxdbController{})
+	beego.Router("/influxdb", &controllers.InfluxdbController{})
 
-    beego.Router("/redis", &controllers.RedisController{})
+	beego.Router("/refresh", &controllers.RedisController{})
 
-    beego.Router("/refresh", &controllers.BeginRefreshRedis{})
-
-	beego.Router("/over", &controllers.BeginRefreshRedis{})
+	//beego.Router("/refresh", &controllers.BeginRefreshRedis{})
 }

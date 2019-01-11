@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>influxdb测试</title>
+</head>
+<body>
+<div>
+    <div>开启redis自动刷新</div>
+    <div>
+        <button onclick="openRedis()">开启</button>
+    </div>
+</div>
+
+<div>
+    <div>停止redis自动刷新</div>
+    <div>
+        <button onclick="closeRedis()">停止</button>
+    </div>
+</div>
+
+<div>
+    <div>从redis向influxdb写数据</div>
+    <div>
+        <button onclick="writeRedis()">写入</button>
+    </div>
+</div>
+
+<div>
+    <label for="">key</label>
+    <input type="text" id="key">
+    <label for="">value1</label>
+    <input type="text" id="value1">
+    <button onclick="Redis()">提交</button>
+</div>
+
+<script src="https://upcdn.b0.upaiyun.com/libs/jquery/jquery-2.0.2.min.js"></script>
+<script>
+
+    function openRedis() {
+        console.log('开启自动刷新');
+        $.ajax({
+            url: 'http://127.0.0.1:8080/refresh',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                console.log(res);
+            }
+        })
+    }
+
+    function closeRedis() {
+        console.log('停止自动刷新');
+        $.ajax({
+            url: 'http://127.0.0.1:8080/refresh',
+            type: 'POST',
+            dataType: 'json',
+            success: function (res) {
+                console.log(res);
+            }
+        })
+    }
+
+    function writeRedis() {
+        console.log('写入数据');
+        $.ajax({
+            url: 'http://127.0.0.1:8080/influxdb',
+            type: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                console.log(res);
+            }
+        })
+    }
+
+    var datas;
+
+    function Redis() {
+        console.log('查询数据');
+
+        var key = $('#key').val();
+
+        var value1 = $('#value1').val();
+
+        console.log(key);
+
+        if (key == '') {
+            datas = {
+                "t1": "2019-01-10T15:43:00+08:00",
+                "t2": "2019-01-12T10:44:43+08:00",
+                "tags": {
+                    "value1": value1
+                }
+            }
+        } else if (value1 == '') {
+            datas = {
+                "t1": "2019-01-10T15:43:00+08:00",
+                "t2": "2019-01-12T10:44:43+08:00",
+                "tags": {
+                    "key": key
+                }
+            }
+        } else {
+            datas = {
+                "t1": "2019-01-10T15:43:00+08:00",
+                "t2": "2019-01-12T10:44:43+08:00",
+                "tags": {
+                    "key": key,
+                    "value1": value1
+                }
+            }
+        }
+
+        console.log(JSON.stringify(datas));
+
+        $.ajax({
+            url: 'http://127.0.0.1:8080/influxdb',
+            type: 'POST',
+            dataType: 'json',
+            data: JSON.stringify(datas),
+            success: function (res) {
+                console.log(res);
+            }
+        })
+    }
+</script>
+</body>
+</html>
