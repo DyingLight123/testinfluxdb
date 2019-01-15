@@ -31,7 +31,7 @@ func (maps *InfluxdbController) Get() {
 		log.Fatal(err)
 	}
 	tt := time.Since(t)
-	fmt.Println(tt)
+	fmt.Println("总的时间：", tt)
 	maps.ServeJSON()
 }
 

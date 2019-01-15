@@ -16,11 +16,13 @@ func AddInfluxdbData() error {
 	if err != nil {
 		return err
 	}
+	t := time.Now()
 	conn := ConnInfluxdb()
 	err = WritesPoints(conn, field)
 	if err != nil {
 		return err
 	}
+	fmt.Println("仅仅是写入influxdb的时间：", time.Since(t))
 	return nil
 }
 
