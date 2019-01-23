@@ -24,7 +24,7 @@ func ConnInfluxdb() client.Client {
 func QueryDB(cli client.Client, cmd string) (res []client.Result, err error) {
 	q := client.Query{
 		Command:  cmd,
-		Database: "test",
+		Database: "space",
 	}
 	if response, err := cli.Query(q); err == nil {
 		if response.Error() != nil {
@@ -41,7 +41,7 @@ func QueryDB(cli client.Client, cmd string) (res []client.Result, err error) {
 func WritesPoints(cli client.Client, field map[string]string) error {
 	//t := time.Now()
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  "test",
+		Database:  "space",
 		Precision: "s",
 	})
 	if err != nil {

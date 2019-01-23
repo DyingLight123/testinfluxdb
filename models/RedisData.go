@@ -2,16 +2,15 @@ package models
 
 import (
 	"encoding/json"
+	"gopkg.in/redis.v4"
 	"math/rand"
 	"strconv"
 	"time"
 )
 
-func AddRedisData(number int) error {
-	cli := ConnRedis()
-	defer cli.Close()
+func AddRedisData(number int, conn *redis.Client) error {
 
-	_, err := cli.Del("data").Result()
+	_, err := conn.Del("data").Result()
 	if err != nil {
 		return err
 	}
@@ -21,14 +20,14 @@ func AddRedisData(number int) error {
 		m := make(map[string]interface{})
 		m["value"+strconv.Itoa(i)] = x
 		j, _ := json.Marshal(m)
-		cli.HSet("data", strconv.Itoa(i), string(j))
+		conn.HSet("data", strconv.Itoa(i), string(j))
 	}
 	return nil
 }
 
-func GetRedisData() (map[string]string, error) {
-	client := ConnRedis()
-	defer client.Close()
+func GetRedisData(conn2 *redis.Client) (map[string]string, error) {
+	/*client := ConnRedis()
+	defer client.Close()*/
 	/*field, err := client.HGet("map", "value99").Result()
 	if err == redis.Nil  {
 		return nil, nil
@@ -39,6 +38,6 @@ func GetRedisData() (map[string]string, error) {
 	} else {
 		return nil, err
 	}*/
-	field, err := client.HGetAll("data").Result()
+	field, err := conn2.HGetAll("data").Result()
 	return field, err
 }

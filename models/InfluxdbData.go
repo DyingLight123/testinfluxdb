@@ -2,6 +2,8 @@ package models
 
 import (
 	"fmt"
+	"github.com/influxdata/influxdb/client/v2"
+	"gopkg.in/redis.v4"
 	"log"
 	"time"
 )
@@ -11,18 +13,20 @@ type MapResults struct {
 	Value   interface{}
 }
 
-func AddInfluxdbData() error {
-	field, err := GetRedisData()
+func AddInfluxdbData(conn1 client.Client, conn2 *redis.Client) error {
+	t1 := time.Now()
+	field, err := GetRedisData(conn2)
 	if err != nil {
 		return err
 	}
-	t := time.Now()
-	conn := ConnInfluxdb()
-	err = WritesPoints(conn, field)
+	log.Println("仅仅是redis的读取时间：", time.Since(t1))
+	t2 := time.Now()
+	//conn := ConnInfluxdb()
+	err = WritesPoints(conn1, field)
 	if err != nil {
 		return err
 	}
-	fmt.Println("仅仅是写入influxdb的时间：", time.Since(t))
+	log.Println("仅仅是写入influxdb的时间：", time.Since(t2))
 	return nil
 }
 

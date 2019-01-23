@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/influxdata/platform/kit/errors"
 	"github.com/robfig/cron"
+	"gopkg.in/redis.v4"
 	"log"
 	"testinfluxdb/models"
 )
@@ -21,7 +22,8 @@ var pause = make(chan string, 1)
 var status int
 
 func (data *RedisController) Get() {
-	go RefreshRedis(100000)
+	conn2 := models.ConnRedis()
+	go RefreshRedis(100000, conn2)
 
 	data.Data["json"] = map[string]interface{}{}
 	data.ServeJSON()
@@ -37,15 +39,15 @@ func (data *RedisController) Post() {
 	data.ServeJSON()
 }
 
-func RefreshRedis(number int) {
+func RefreshRedis(number int, conn2 *redis.Client) {
 	if status == 1 {
 		log.Println("refreshing! please pause! ")
 		return
 	}
 	status = 1
 	c := cron.New()
-	c.AddFunc("@every "+"30s", func() {
-		err := models.AddRedisData(number)
+	c.AddFunc("@every "+"60s", func() {
+		err := models.AddRedisData(number, conn2)
 		if err != nil {
 			log.Println(err)
 			return

@@ -10,7 +10,7 @@ func init() {
 
 	beego.Router("/influxdb", &controllers.InfluxdbController{})
 
-	beego.Router("/refresh", &controllers.RedisController{})
+	beego.Router("/redis", &controllers.RedisController{})
 
-	//beego.Router("/refresh", &controllers.BeginRefreshRedis{})
+	beego.Router("/refresh", &controllers.RefreshController{})
 }

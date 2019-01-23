@@ -2,12 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/astaxie/beego"
-	"gopkg.in/redis.v4"
 	"log"
 	"testinfluxdb/models"
-	"time"
 )
 
 type InfluxdbController struct {
@@ -20,7 +17,7 @@ type InputTime struct {
 	Tags map[string]string `json:"tags"`
 }
 
-func (maps *InfluxdbController) Get() {
+/*func (maps *InfluxdbController) Get() {
 	t := time.Now()
 	err := models.AddInfluxdbData()
 	if err == redis.Nil {
@@ -33,7 +30,7 @@ func (maps *InfluxdbController) Get() {
 	tt := time.Since(t)
 	fmt.Println("总的时间：", tt)
 	maps.ServeJSON()
-}
+}*/
 
 func (maps *InfluxdbController) Post() {
 	t := new(InputTime)
